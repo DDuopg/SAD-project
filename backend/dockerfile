@@ -1,0 +1,23 @@
+# Step 1: Build Stage
+FROM maven:3.9.5-eclipse-temurin-17 AS build
+WORKDIR /app
+
+# 复制 Maven 配置文件（加快依赖下载速度，若存在）
+COPY pom.xml ./
+COPY src ./src
+
+# 使用 Maven 构建应用程序
+RUN mvn clean package -DskipTests
+
+# Step 2: Run Stage
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+
+# 从构建阶段复制生成的 JAR 文件
+COPY --from=build /app/target/*.jar app.jar
+
+# 暴露应用程序的端口
+EXPOSE 8080
+
+# 启动 Spring Boot 应用
+ENTRYPOINT ["java", "-jar", "app.jar"]

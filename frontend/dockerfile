@@ -1,0 +1,49 @@
+
+FROM ubuntu:20.04
+
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    wget \
+    unzip \
+    libglu1-mesa \
+    openjdk-11-jdk \
+    libstdc++6 \
+    fonts-droid-fallback \
+    python3 \
+    && apt-get clean
+
+
+ENV PUB_HOSTED_URL=https://pub.flutter-io.cn
+ENV FLUTTER_STORAGE_BASE_URL=https://storage.flutter-io.cn
+
+
+RUN git clone -b stable https://github.com/flutter/flutter.git /usr/local/flutter
+
+
+ENV PATH="/usr/local/flutter/bin:/usr/local/flutter/bin/cache/dart-sdk/bin:$PATH"
+
+
+RUN flutter doctor
+
+
+RUN flutter config --enable-web
+
+
+WORKDIR /app
+
+
+COPY . /app/
+
+
+RUN flutter pub get
+
+
+EXPOSE 3000
+
+
+CMD ["flutter", "run", "-d", "web-server", "--web-port=3000", "--web-hostname=0.0.0.0"]
